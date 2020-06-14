@@ -1,0 +1,155 @@
+<div class="card mt-4">
+  <h4 class="card-header">
+    <span>List todos</span>
+  </h4>
+  <div class="card-body">
+    <div *ngIf="loading" class="text-center">
+      <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
+        <span class="sr-only">Loading...</span>
+      </div>
+    </div>
+    <div class="row mb-2">
+      <div class="col-6">
+        <ng-select
+          [items]="this.fields"
+          [multiple]="true"
+          [hideSelected]="true"
+          bindLabel="name"
+          placeholder="Sort by"
+          [(ngModel)]="selectedFields"
+          [closeOnSelect]="true"
+          (change)="resetPage();get()">
+        </ng-select>
+      </div>
+      <div class="col-3">
+        <button type="button" class="btn mr-2 mb-1" [disabled]="selectedFields.length === 0" [ngClass]="{'btn-primary' : sortAsc, 'btn-secondary' : !sortAsc}" (click)="sortAscending()">
+          Ascending
+        </button>
+        <button type="button" class="btn mb-1" [disabled]="selectedFields.length === 0" [ngClass]="{'btn-primary' : !sortAsc, 'btn-secondary' : sortAsc}" (click)="sortDescending()">
+          Descending
+        </button>
+      </div>
+      <div class="col-3">
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Limit</span>
+          </div>
+          <input type="number" class="form-control" [(ngModel)]="limit" (ngModelChange)="limitChange()">
+        </div>
+      </div>
+    </div>
+    <table *ngIf="todos" class="table">
+      <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Title</th>
+        <th scope="col">Priority</th>
+        <th scope="col">Deadline</th>
+        <th scope="col">Created Date</th>
+        <th scope="col">Actions</th>
+      </tr>
+      </thead>
+      <thead>
+      <tr>
+        <th scope="col" style="width: 6rem">
+          <input type="text" class="form-control" id="id" aria-describedby="id" (keyup)="filter('id',$event.target.value)">
+        </th>
+        <th scope="col">
+          <input type="text" class="form-control" id="title" aria-describedby="title" (keyup)="filter('title',$event.target.value)">
+        </th>
+        <th scope="col" class="font-weight-normal" style="width: 10rem">
+          <ng-select
+            [items]="this.priorityValues"
+            [multiple]="false"
+            [closeOnSelect]="true"
+            [hideSelected]="false"
+            [searchable]="false"
+            bindLabel="name"
+            (change)="filter('priority',$event)">
+          </ng-select>
+        </th>
+        <th scope="col">
+          <div class="row">
+            <button *ngIf="!deadlineFilterType" type="button" class="btn btn-sm btn-primary mr-2 mb-1" (click)="deadlineFilterType='rangeFrom'">From</button>
+            <button *ngIf="!deadlineFilterType" type="button" class="btn btn-sm btn-primary mr-2 mb-1" (click)="deadlineFilterType='rangeTo'">Until</button>
+            <button *ngIf="!deadlineFilterType" type="button" class="btn btn-sm btn-primary mb-1" (click)="deadlineFilterType='range'">Range</button>
+          </div>
+          <div *ngIf="deadlineFilterType" class="input-group">
+            <input [readOnly]="true" type="text" class="form-control datetime" [owlDateTimeTrigger]="deadline" [owlDateTime]="deadline"
+                   [selectMode]="deadlineFilterType" [(ngModel)]="deadlineValue" (ngModelChange)="filter('deadline',$event)">
+            <owl-date-time #deadline></owl-date-time>
+            <div class="input-group-append">
+              <span class="input-group-text cursor-pointer" (click)="deadlineValue = null;filter('deadline', null);deadlineFilterType=null"><i class="fas fa-times"></i></span>
+            </div>
+          </div>
+        </th>
+        <th scope="col">
+          <div class="row">
+            <button *ngIf="!createdDateFilterType" type="button" class="btn btn-sm btn-primary mr-2 mb-1" (click)="createdDateFilterType='rangeFrom'">From</button>
+            <button *ngIf="!createdDateFilterType" type="button" class="btn btn-sm btn-primary mr-2 mb-1" (click)="createdDateFilterType='rangeTo'">Until</button>
+            <button *ngIf="!createdDateFilterType" type="button" class="btn btn-sm btn-primary mb-1" (click)="createdDateFilterType='range'">Range</button>
+          </div>
+          <div *ngIf="createdDateFilterType" class="input-group">
+            <input [readOnly]="true" type="text" class="form-control datetime" [owlDateTimeTrigger]="createdDate" [owlDateTime]="createdDate"
+                   [selectMode]="createdDateFilterType" [(ngModel)]="createdDateValue" (ngModelChange)="filter('createdDate',$event)">
+            <owl-date-time #createdDate></owl-date-time>
+            <div class="input-group-append">
+              <span class="input-group-text cursor-pointer" (click)="createdDateValue = null;filter('createdDate', null);createdDateFilterType=null"><i class="fas fa-times"></i></span>
+            </div>
+          </div>
+        </th>
+        <th scope="col"></th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let todo of this.todos">
+        <th scope="row">{{todo.id}}</th>
+        <td>{{todo.title}}</td>
+        <td>{{todo.priority}}</td>
+        <td>{{todo.deadline}}</td>
+        <td>{{todo.createdDate | date: "yyyy-MM-ddTHH:mm:SS"}}</td>
+        <td>
+          <span class="ml-2">
+            <a (click)="editTodo(todo.id)" ngbTooltip="Edit user">
+              <i class="fa fa-pencil-alt"></i>
+            </a>
+          </span>
+          <span class="ml-2">
+            <i *ngIf="!shouldLoadDelete(todo.id)" (click)="deleteTodo(todo.id)" class="far fa-trash-alt"></i>
+            <span *ngIf="shouldLoadDelete(todo.id)" class="spinner-border spinner-border-sm" role="status">
+              <span class="sr-only">Loading...</span>
+            </span>
+          </span>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="todos && todos.length === 0" class="text-center">
+      <h4>There's no matching todo(s)</h4>
+    </div>
+
+    <div class="d-flex justify-content-center">
+      <span><i class="fas fa-arrow-left" (click)="previous()" [ngClass]="{'text-primary': page > 1}"></i></span>
+      <span class="ml-3 mr-1" style="width: 4rem;">
+              <ng-select
+                [items]="this.pageList"
+                [multiple]="false"
+                [closeOnSelect]="true"
+                [hideSelected]="false"
+                [searchable]="false"
+                [virtualScroll]="true"
+                bindLabel="name"
+                (change)="pageChange()"
+                [(ngModel)]="page"
+                [clearable]="false"
+                [clearOnBackspace]="false">
+              </ng-select></span>
+      <span class="mr-3 mt-1 align-middle">/{{numberOfPages}}</span>
+      <span><i class="fas fa-arrow-right" (click)="next()" [ngClass]="{'text-primary': page < numberOfPages}"></i></span>
+    </div>
+    <div class="d-flex justify-content-center">
+
+    </div>
+  </div>
+</div>

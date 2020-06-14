@@ -1,0 +1,61 @@
+<div class="col-md-6 offset-md-3 mt-4">
+  <div class="card">
+    <h4 *ngIf="this.route.snapshot.url[0].path === 'add-todo'" class="card-header">Add todo</h4>
+    <h4 *ngIf="this.route.snapshot.url[0].path === 'edit-todo'" class="card-header">Edit todo</h4>
+    <div class="card-body">
+      <div *ngIf="loadingData" class="text-center">
+        <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+      </div>
+      <form *ngIf="!loadingData" [formGroup]="todoForm" (ngSubmit)="onSubmit()" class="clearfix">
+        <div class="form-group">
+          <label for="title">Title</label>
+          <input id="title" type="text" formControlName="title" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.title.errors }"/>
+          <div *ngIf="submitted && f.title.errors" class="invalid-feedback">
+            <div *ngIf="f.title.errors.required">Title is required</div>
+            <div *ngIf="f.title.errors.maxlength">The title has to be maximum 255 letters</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="row">
+            <div class="col mx-0 my-2">Priority</div>
+          </div>
+          <ng-select
+            [items]="this.priorityValues"
+            [multiple]="false"
+            [closeOnSelect]="true"
+            [hideSelected]="false"
+            [searchable]="false"
+            bindLabel="name"
+            formControlName="priority"
+            [ngClass]="{ 'is-invalid': submitted && f.priority.errors }">
+          </ng-select>
+          <small *ngIf="submitted && f.priority.errors?.required" class="text-danger">Priority is required</small>
+        </div>
+        <div class="row">
+          <div class="col mx-0 my-2">Deadline</div>
+        </div>
+        <div class="input-group mb-5">
+          <input id="deadline" [readOnly]="true" type="text" class="form-control datetime" [owlDateTimeTrigger]="deadline" [owlDateTime]="deadline"
+                 [selectMode]="'single'" [formControl]="f.deadline">
+          <owl-date-time #deadline></owl-date-time>
+          <div class="input-group-append">
+            <span class="input-group-text cursor-pointer" (click)="clearDeadline()"><i class="fas fa-times"></i></span>
+          </div>
+        </div>
+        <div class="float-left">
+          <button type="submit" [disabled]="loading" class="btn btn-primary">
+            <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
+            Save
+          </button>
+        </div>
+        <div class="float-right">
+          <button type="button" routerLink="/list-todos" class="btn btn-primary">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
