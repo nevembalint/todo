@@ -59,6 +59,21 @@
       <artifactId>specification-arg-resolver</artifactId>
       <version>2.3.0</version>
     </dependency>
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-core</artifactId>
+      <version>5.4.12.Final</version>
+    </dependency>
+    <dependency>
+      <groupId>org.javassist</groupId>
+      <artifactId>javassist</artifactId>
+      <version>3.18.2-GA</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.tomcat</groupId>
+      <artifactId>tomcat-dbcp</artifactId>
+      <version>9.0.36</version>
+    </dependency>
   </dependencies>
 
   <build>
